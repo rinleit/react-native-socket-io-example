@@ -8,7 +8,6 @@ var db = mongojs(process.env.MONGO_URL || 'mongodb://localhost:27017/local');
 var app = express();
 var server = http.Server(app);
 var websocket = socketio(server);
-server.listen(3000, () => console.log('listening on *:3000'));
 
 // Mapping objects to easily map sockets and users.
 var clients = {};
@@ -22,7 +21,12 @@ websocket.on('connection', (socket) => {
     clients[socket.id] = socket;
     socket.on('userJoined', (userId) => onUserJoined(userId, socket));
     socket.on('message', (message) => onMessageReceived(message, socket));
+    // socket.on('disconnect', () => {
+    //   console.log("Disconnect");
+    // });
 });
+
+server.listen(3333, () => console.log('listening on *:3333'));
 
 // Event listeners.
 // When a user joins the chatroom.
@@ -49,7 +53,6 @@ function onMessageReceived(message, senderSocket) {
   var userId = users[senderSocket.id];
   // Safety check.
   if (!userId) return;
-
   _sendAndSaveMessage(message, senderSocket);
 }
 
@@ -72,22 +75,29 @@ function _sendAndSaveMessage(message, socket, fromServer) {
     text: message.text,
     user: message.user,
     createdAt: new Date(message.createdAt),
-    chatId: chatId
+    chatId: chatId,
+    image: null
   };
 
   db.collection('messages').insert(messageData, (err, message) => {
     // If the message is from the server, then send to everyone.
     var emitter = fromServer ? websocket : socket.broadcast;
     emitter.emit('message', [message]);
+
   });
 }
 
 // Allow the server to participate in the chatroom through stdin.
+const _avatar = 'https://znews-photo-td.zadn.vn/w1024/Uploaded/ofh_fdmzsofw/2018_02_15/201710100433501.jpg'; 
 var stdin = process.openStdin();
 stdin.addListener('data', function(d) {
   _sendAndSaveMessage({
     text: d.toString().trim(),
     createdAt: new Date(),
-    user: { _id: 'robot' }
+    user: { 
+      _id: '0000',
+      name: 'robot',
+      avatar: _avatar
+    }
   }, null /* no socket */, true /* send from server */);
 });

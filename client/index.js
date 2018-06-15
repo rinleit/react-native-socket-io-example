@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, AsyncStorage } from 'react-native';
 import SocketIOClient from 'socket.io-client';
-import { GiftedChat } from 'react-native-gifted-chat';
+import { GiftedChat, Bubble } from 'react-native-gifted-chat';
 
 const USER_ID = '@userId';
 
@@ -18,7 +18,7 @@ class Main extends React.Component {
     this.onSend = this.onSend.bind(this);
     this._storeMessages = this._storeMessages.bind(this);
 
-    this.socket = SocketIOClient('http://localhost:3000');
+    this.socket = SocketIOClient('http://10.0.3.2:3333'); //ip localhost in genymotion
     this.socket.on('message', this.onReceivedMessage);
     this.determineUser();
   }
@@ -58,8 +58,20 @@ class Main extends React.Component {
    * When a message is sent, send the message to the server
    * and store it in this component's state.
    */
+  
   onSend(messages=[]) {
-    this.socket.emit('message', messages[0]);
+    const _avatar = 'https://znews-photo-td.zadn.vn/w1024/Uploaded/ofh_fdmzsofw/2018_02_15/201710100433501.jpg'
+    mess = {
+      _id: messages[0]._id,
+      createAt: new Date(),
+      text: messages[0].text,
+      user: {
+        _id: messages[0].user._id,
+        name: messages[0].user.name,
+        avatar: _avatar
+      }
+    }
+    this.socket.emit('message', mess);
     this._storeMessages(messages);
   }
 
@@ -68,9 +80,11 @@ class Main extends React.Component {
 
     return (
       <GiftedChat
+        showUserAvatar={true}
         messages={this.state.messages}
         onSend={this.onSend}
         user={user}
+        renderBubble={this.renderBubble.bind(this)}
       />
     );
   }
@@ -83,6 +97,33 @@ class Main extends React.Component {
       };
     });
   }
+
+  // Customize Color
+  renderBubble = props => (
+    <Bubble
+      {...props}
+      wrapperStyle={{
+        left: {
+          backgroundColor: '#e5e5e5',
+        },
+        right: {
+          backgroundColor: '#099eef',
+        },
+      }}
+      textStyle={{
+        left: {
+          color: '#000',
+        },
+        right: {
+          color: '#fff',
+        },
+      }}
+    />
+  )
+
 }
 
 module.exports = Main;
+
+
+
