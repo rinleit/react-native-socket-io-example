@@ -3,7 +3,7 @@ var http = require('http')
 var socketio = require('socket.io');
 var mongojs = require('mongojs');
 
-var ObjectID = mongojs.ObjectID;
+//var ObjectID = mongojs.ObjectID;
 var db = mongojs(process.env.MONGO_URL || 'mongodb://localhost:27017/local');
 var app = express();
 var server = http.Server(app);

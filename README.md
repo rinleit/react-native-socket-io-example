@@ -30,3 +30,10 @@ $ npm run server
 
 ### Demo
 <img src='demo.gif' title='Video Walkthrough' alt='Video Walkthrough' />
+
+
+### Clean build app
+* Android 
+    ```
+    $ cd android & ./gradlew clean
+    ```
